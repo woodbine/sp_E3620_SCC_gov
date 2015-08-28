@@ -57,7 +57,7 @@ def convert_mth_strings ( mth_string ):
     return mth_string
 # pull down the content from the webpage
 html = urllib2.urlopen(url)
-soup = BeautifulSoup(html)
+soup = BeautifulSoup(html, 'lxml')
 # find all entries with the required class
 block = soup.find('div', attrs = {'class':'col-md-12 col-xs-12'})
 links = block.find_all('a')
@@ -65,7 +65,7 @@ for link in links:
     if 'spending' in link['href']:
         url = link['href']
         html_csv = urllib2.urlopen(url)
-        soup_csv = BeautifulSoup(html_csv)
+        soup_csv = BeautifulSoup(html_csv, 'lxml')
         block_csv = soup_csv.find('div', attrs = {'class':'scc-file-resources'})
         year = soup_csv.find('div', attrs = {'class':'scc-main-content'}).find('h1').text
         csvYr = year.split(' ')[-1].strip()
