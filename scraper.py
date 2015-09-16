@@ -111,7 +111,7 @@ for link in links:
         csvYr = year.split(' ')[-1].strip()
         links_csv = block_csv.find_all('a')
         for link_csv in links_csv:
-            rl = link_csv['href']
+            url = link_csv['href']
             if 'purchas' not in url.lower():
                 if 'grant' not in url.lower():
                     if '5000' not in url:
