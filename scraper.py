@@ -86,7 +86,7 @@ def convert_mth_strings ( mth_string ):
 #### VARIABLES 1.0
 
 entity_id = "E3620_SCC_gov"
-url = "http://new.surreycc.gov.uk/business-and-consumers/supplying-the-council/procurement-open-data/procurement-report-archive"
+url = "http://www.surreycc.gov.uk/business-and-consumers/supplying-the-council/procurement-open-data/procurement-report-archive"
 errors = 0
 data = []
 
@@ -118,6 +118,27 @@ for link in links:
                         try:
                             qtr = re.search('Q([1-4])', url).group(1)
                             csvMth = 'Q' + str(int(qtr) + 1)
+                        except:
+                            csvMth = 'Q0'
+                        if csvMth == 'Q5':
+                            csvYr = str(int(csvYr) + 1)
+                            csvMth = 'Q1'
+                        data.append([csvYr, csvMth, url])
+    else:
+        url = link['href']
+        html_csv = urllib2.urlopen(url)
+        soup_csv = BeautifulSoup(html_csv, 'lxml')
+        block_csv = soup_csv.find('div', attrs = {'class':'scc-file-resources'})
+        links_csv = block_csv.find_all('a')
+        for link_csv in links_csv:
+            url = link_csv['href']
+            if 'purchas' not in url.lower():
+                if 'grant' not in url.lower():
+                    if '5000' not in url:
+                        try:
+                            qtr = re.search('Q([1-4])', url).group(1)
+                            csvMth = 'Q' + str(int(qtr) + 1)
+                            csvYr = link_csv.text.split('.')[0][-4:].strip()
                         except:
                             csvMth = 'Q0'
                         if csvMth == 'Q5':
