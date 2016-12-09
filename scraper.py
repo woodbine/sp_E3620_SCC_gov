@@ -86,7 +86,7 @@ def convert_mth_strings ( mth_string ):
 #### VARIABLES 1.0
 
 entity_id = "E3620_SCC_gov"
-url = "http://www.surreycc.gov.uk/business-and-consumers/supplying-the-council/procurement-open-data/procurement-report-archive"
+url = "http://data.surreycc.gov.uk/def/concept/folders/themes/transparency"
 errors = 0
 data = []
 
@@ -99,52 +99,26 @@ soup = BeautifulSoup(html, "lxml")
 
 #### SCRAPE DATA
 
-block = soup.find('div', attrs = {'class':'col-md-12 col-xs-12'})
-links = block.find_all('a')
+links = soup.find_all('li', 'resource file csv')
 for link in links:
-    if 'spending' in link['href']:
-        url = link['href']
+    if '/spending/' in link.find('a')['href']:
+        url = link.find('a')['href']
         html_csv = urllib2.urlopen(url)
         soup_csv = BeautifulSoup(html_csv, 'lxml')
-        block_csv = soup_csv.find('div', attrs = {'class':'scc-file-resources'})
-        year = soup_csv.find('div', attrs = {'class':'scc-main-content'}).find('h1').text
-        csvYr = year.split(' ')[-1].strip()
-        links_csv = block_csv.find_all('a')
-        for link_csv in links_csv:
-            url = link_csv['href']
-            if 'purchas' not in url.lower():
-                if 'grant' not in url.lower():
-                    if '5000' not in url:
-                        try:
-                            qtr = re.search('Q([1-4])', url).group(1)
-                            csvMth = 'Q' + str(int(qtr) + 1)
-                        except:
-                            csvMth = 'Q0'
-                        if csvMth == 'Q5':
-                            csvYr = str(int(csvYr) + 1)
-                            csvMth = 'Q1'
-                        data.append([csvYr, csvMth, url])
-    else:
-        url = link['href']
-        html_csv = urllib2.urlopen(url)
-        soup_csv = BeautifulSoup(html_csv, 'lxml')
-        block_csv = soup_csv.find('div', attrs = {'class':'scc-file-resources'})
-        links_csv = block_csv.find_all('a')
-        for link_csv in links_csv:
-            url = link_csv['href']
-            if 'purchas' not in url.lower():
-                if 'grant' not in url.lower():
-                    if '5000' not in url:
-                        try:
-                            qtr = re.search('Q([1-4])', url).group(1)
-                            csvMth = 'Q' + str(int(qtr) + 1)
-                            csvYr = link_csv.text.split('.')[0][-4:].strip()
-                        except:
-                            csvMth = 'Q0'
-                        if csvMth == 'Q5':
-                            csvYr = str(int(csvYr) + 1)
-                            csvMth = 'Q1'
-                        data.append([csvYr, csvMth, url])
+        links_csv = soup_csv.find('a', text='Download url').find_next('a')
+        if '.csv' in links_csv['href']:
+            csvMth = url.split('/')[-1].split('-')[-1]
+            csvYr = url.split('/')[-1].split('-')[0]
+            csv_url = links_csv['href']
+            if 'Qtr1' in csvMth:
+                csvMth = 'Q1'
+            elif 'Qtr2' in csvMth:
+               csvMth = 'Q2'
+            elif 'Qtr3' in csvMth:
+                csvMth = 'Q3'
+            elif 'Qtr4' in csvMth:
+                csvMth = 'Q4'
+            data.append([csvYr, csvMth, csv_url])
 
 
 #### STORE DATA 1.0
